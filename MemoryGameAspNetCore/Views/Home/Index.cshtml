@@ -1,0 +1,244 @@
+﻿@{
+    ViewData["Title"] = "Gra Memory";
+}
+<div class="card mt-5 game-area">
+    <div class="menu-area">
+    <button id="timer" class="btn bg-black btn-start">Start/Restart</button>
+    <button id="stopGame" class="btn bg-black btn-start">Stop</button>
+    @Html.TextBox("ScoreInput", "00:00", new { @class = "score-screen", disabled = "disabled" })
+
+    </div>
+    <div id="timeOutput"></div>
+    <div class="game-btns">
+        <button type="button" class="btn bg-info" id="0" onClick="showNumber(0)"></button>
+        <button type="button" class="btn bg-info" id="1" onClick="showNumber(1)"></button>
+        <button type="button" class="btn bg-info" id="2" onClick="showNumber(2)"></button>
+        <button type="button" class="btn bg-info" id="3" onClick="showNumber(3)"></button>
+        <button type="button" class="btn bg-info" id="4" onClick="showNumber(4)"></button>
+        <button type="button" class="btn bg-info" id="5" onClick="showNumber(5)"></button>
+        <button type="button" class="btn bg-info" id="6" onClick="showNumber(6)"></button>
+        <button type="button" class="btn bg-info" id="7" onClick="showNumber(7)"></button>
+        <button type="button" class="btn bg-info" id="8" onClick="showNumber(8)"></button>
+        <button type="button" class="btn bg-info" id="9" onClick="showNumber(9)"></button>
+        <button type="button" class="btn bg-info" id="10" onClick="showNumber(10)"></button>
+        <button type="button" class="btn bg-info" id="11" onClick="showNumber(11)"></button>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        var scoreInput = $("#ScoreInput");
+        var firstNumber = '';
+        var secondNumber = '';
+        var firstId = '';
+        var secondId = ';'
+        var score = 0;
+        var count = 0;
+        let startTime = null;
+        var countdown;
+        var timer = 0;
+        var countUp;
+        var minutes = 0;
+        var seconds = 0;
+
+        $(document).ready(function () {
+
+            let lockNumbers = false;
+            const buttonStart = document.querySelector("#timer");
+            buttonStart.addEventListener("click", startGame);
+            const timeOutput = document.querySelector("#timeOutput");
+
+           const buttonStop = document.querySelector("#stopGame");
+            buttonStop.addEventListener("click", stopGame);
+
+            const NumRandom = []
+            var pickedNumber = '';
+            for (let i = 0; i < 6; i++) {
+
+                pickedNumber = Math.floor(Math.random() * 10) + 1;
+
+                while (NumRandom.includes(pickedNumber)) {
+                    pickedNumber = Math.floor(Math.random() * 10) + 1;
+                }
+                NumRandom[i] = pickedNumber;
+            } 
+            const NumArr = NumRandom.concat(NumRandom);
+            shuffleArray(NumArr);
+
+            for (let i = 0; i < 12; i++) {
+                document.getElementById(i).value=NumArr[i];
+                document.getElementById(i).setAttribute("disabled", true);
+            }
+        })
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        //function to implement countdown 
+    /*   function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            countdown = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.val(minutes + ":" + seconds);
+                if (--timer < 0) {
+                    timer = 0;
+                }
+            }, 1000); 
+        } */
+
+        function countTime(zeroTime) {
+
+            countUp = setInterval(function () {
+
+                minutes = parseInt(zeroTime / 60, 10); //change time in seconds into minutes and seconds
+                seconds = parseInt(zeroTime % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes; //add zero to time to look better
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                scoreInput.val(minutes + ":" + seconds);
+                zeroTime++;
+
+                if (zeroTime > 181) {
+                    resetGame();
+                    clearInterval(countUp);
+                    scoreInput.val("00:00");
+                }
+            }, 1000);
+        }
+
+        function resetGame() {
+            firstNumber = '';
+            secondNumber = '';
+            firstId = '';
+            secondId = ';'
+            score = 0;
+            count = 0;
+            startTime = null;
+            clearInterval(countdown);
+            clearInterval(countUp);
+            
+            NumRandom = [];
+            NumArr = [];
+            pickedNumber = '';
+            for (let i = 0; i < 6; i++) {
+
+                pickedNumber = Math.floor(Math.random() * 10) + 1;
+
+                while (NumRandom.includes(pickedNumber)) {
+                    pickedNumber = Math.floor(Math.random() * 10) + 1;
+                }
+                NumRandom[i] = pickedNumber;
+            }
+            NumArr = NumRandom.concat(NumRandom);
+            shuffleArray(NumArr);
+
+            for (let i = 0; i < 12; i++) {
+                document.getElementById(i).value = NumArr[i];
+                document.getElementById(i).innerHTML = '';
+                document.getElementById(i).setAttribute("disabled", true);
+            }
+
+            scoreInput.val("00:00");
+        }
+
+        function stopGame(){
+            resetGame();
+        }
+
+        function startGame(){
+            if (startTime) {
+                resetGame();
+            }
+
+                for (let i = 0; i < 12; i++) {
+                    document.getElementById(i).removeAttribute("disabled");
+                }
+
+            //countDown timer
+            //var duration = 30;
+            //startTimer(duration, timerOutput);
+
+            startTime = Date.now();
+            var zeroTime = 1;
+            countTime(zeroTime);
+        }
+
+        function showNumber(btnId) {
+            if (count == 0) {
+                document.getElementById(btnId).innerHTML = document.getElementById(btnId).value; //odkryj
+                document.getElementById(btnId).setAttribute("disabled", true);
+                firstNumber = document.getElementById(btnId).value;
+                firstId = btnId;
+                count = 1;
+            } else if (count == 1) {
+                count = 2;
+                document.getElementById(btnId).innerHTML = document.getElementById(btnId).value; //odkryj
+                secondNumber = document.getElementById(btnId).value; //zapamietaj druga liczbe
+                secondId = btnId;
+                checkForMatch();
+            } else if (count == 2) {
+            };
+        }
+
+        function checkForMatch() {
+            let myElement = document.getElementById(firstId);
+            let mySecondElement = document.getElementById(secondId);
+
+            if (firstNumber == secondNumber) {
+                document.getElementById(firstId).setAttribute("disabled", true);
+                document.getElementById(secondId).setAttribute("disabled", true);
+                score = score + 1;
+                count = 0;
+                firstId = '';
+                firstNumber = '';
+                secondId = '';
+                secondNumber = '';
+            } else {
+                document.getElementById(firstId).removeAttribute("disabled");
+                setTimeout(function () {
+                    myElement.innerHTML = "";
+                    mySecondElement.innerHTML = "";
+                    count = 0;
+                    firstId = '';
+                    firstNumber = '';
+                    secondId = '';
+                    secondNumber = '';
+                }, 500);
+            }
+
+            if (score == 6) {
+
+               // clearInterval(countdown);
+
+                var endTime = Date.now();
+                var differenceSeconds = ((endTime - startTime) / 1000).toFixed(2);
+
+                minutes = parseInt(differenceSeconds / 60, 10); //change time in seconds into minutes and seconds
+                seconds = (differenceSeconds % 60).toFixed(2);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes; //add zero to time to look better
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                var difference = minutes + ":" + seconds;
+                difference = difference.replace(/\./g, ':');
+                scoreInput.val(difference);
+                clearInterval(countUp);
+            }
+        }
+
+    </script>
+
+}
